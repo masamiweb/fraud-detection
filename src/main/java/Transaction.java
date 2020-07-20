@@ -1,6 +1,6 @@
 import java.util.Objects;
 
-public class Transaction {
+public class Transaction implements Comparable<Transaction> {
     private final String customerId;
     private final int age;
     private final String gender;
@@ -94,4 +94,12 @@ public class Transaction {
                 ", isFraud=" + isFraud +
                 '}';
     }
+
+    @Override
+    public int compareTo(Transaction o) {
+        return Double.compare(this.getAmount(), o.getAmount());
+    }
+
+
+
 }

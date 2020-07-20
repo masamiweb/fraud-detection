@@ -1,9 +1,11 @@
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 public class DataCruncher {
@@ -42,33 +44,48 @@ public class DataCruncher {
 
     // task 1
     public Set<String> getUniqueMerchantIds() throws Exception {
-
-        return Set.of();
+        return readAllTransactions().stream()
+                .map(Transaction::getMerchantId)
+                .collect(Collectors.toSet());
+        //return Set.of();
     }
 
     // task 2
     public long getTotalNumberOfFraudulentTransactions() throws Exception {
-        return 0;
+        return readAllTransactions().stream()
+                .filter(Transaction::isFraud).count();
+        //return 0;
     }
 
     // task 3
     public long getTotalNumberOfTransactions(boolean isFraud) throws Exception {
-        return 0;
+
+            return readAllTransactions().stream()
+                    .filter(transaction -> transaction.isFraud() == isFraud).count();
     }
 
     // task 4
     public Set<Transaction> getFraudulentTransactionsForMerchantId(String merchantId) throws Exception {
-        return Set.of();
+        return readAllTransactions().stream()
+                .filter(transaction -> transaction.getMerchantId().equals(merchantId))
+                .filter(Transaction::isFraud)
+                .collect(Collectors.toSet());
     }
 
     // task 5
     public Set<Transaction> getTransactionsForMerchantId(String merchantId, boolean isFraud) throws Exception {
-        return Set.of();
+            return readAllTransactions().stream()
+                    .filter(transaction -> transaction.getMerchantId().equals(merchantId))
+                    .filter(transaction -> transaction.isFraud() == isFraud)
+                    .collect(Collectors.toSet());
     }
 
     // task 6
     public List<Transaction> getAllTransactionsSortedByAmount() throws Exception {
-        return List.of();
+        List<Transaction> l = readAllTransactions();
+        Collections.sort(l);
+        return l;
+        //return List.of();
     }
 
     // task 7

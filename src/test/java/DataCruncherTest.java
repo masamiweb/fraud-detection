@@ -1,11 +1,13 @@
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
+
 import org.junit.Test;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 public class DataCruncherTest {
     private final DataCruncher dataCruncher = new DataCruncher();
@@ -63,7 +65,10 @@ public class DataCruncherTest {
     @Test
     public void getAllTransactionSortedByAmount() throws Exception {
         List<Transaction> allTransactionsSortedByAmount = dataCruncher.getAllTransactionsSortedByAmount();
-        fail();
+
+        // check the list is sorted in ascending order of Amount
+        assertEquals(true,isSorted(allTransactionsSortedByAmount, Transaction::getAmount));
+
     }
 
     // task7
@@ -93,4 +98,20 @@ public class DataCruncherTest {
         Map<String, Double> merchantIdToTotalAmountOfFraudulentTransactions = dataCruncher.getMerchantIdToTotalAmountOfFraudulentTransactions();
         fail();
     }
+
+    private static <T, R extends Comparable<? super R>> boolean isSorted(List<T> list, Function<T, R> f) {
+        Comparator<T> comp = Comparator.comparing(f);
+        for (int i = 0; i < list.size() - 1; ++i) {
+            T left = list.get(i);
+            T right = list.get(i + 1);
+            if (comp.compare(left, right) > 0) {
+                System.out.println("INDEX: " + i);
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
 }
