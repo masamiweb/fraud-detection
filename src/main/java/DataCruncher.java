@@ -85,12 +85,16 @@ public class DataCruncher {
         List<Transaction> l = readAllTransactions();
         Collections.sort(l);
         return l;
-        //return List.of();
     }
 
     // task 7
     public double getFraudPercentageForMen() throws Exception {
-        return 0.0;
+
+        System.out.println("IS F: " + readAllTransactions().stream().filter(Transaction::isFraud).count() );
+        return (double) readAllTransactions().stream()
+                .filter(transaction -> transaction.getGender().toLowerCase()
+                        .equals("m") && transaction.isFraud()).count() /
+                (readAllTransactions().stream().filter(Transaction::isFraud).count());
     }
 
     // task 8
