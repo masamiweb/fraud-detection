@@ -95,6 +95,9 @@ public class Transaction implements Comparable<Transaction> {
                 '}';
     }
 
+    /*
+    implemet compareTo method and overide default one
+     */
     @Override
     public int compareTo(Transaction o) {
         return Double.compare(this.getAmount(), o.getAmount());

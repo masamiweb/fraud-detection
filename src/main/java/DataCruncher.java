@@ -1,12 +1,13 @@
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toCollection;
 
 public class DataCruncher {
 
@@ -32,7 +33,7 @@ public class DataCruncher {
                             Double.parseDouble(commaSeparatedLine.get(8)),
                             "1".equals(commaSeparatedLine.get(9)));
                 })
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()); // TODO test with and without this line JUnit benchmark, JMH, java micro-benchmark
     }
 
     // example
@@ -47,19 +48,16 @@ public class DataCruncher {
         return readAllTransactions().stream()
                 .map(Transaction::getMerchantId)
                 .collect(Collectors.toSet());
-        //return Set.of();
     }
 
     // task 2
     public long getTotalNumberOfFraudulentTransactions() throws Exception {
         return readAllTransactions().stream()
                 .filter(Transaction::isFraud).count();
-        //return 0;
     }
 
     // task 3
     public long getTotalNumberOfTransactions(boolean isFraud) throws Exception {
-
             return readAllTransactions().stream()
                     .filter(transaction -> transaction.isFraud() == isFraud).count();
     }
@@ -82,34 +80,56 @@ public class DataCruncher {
 
     // task 6
     public List<Transaction> getAllTransactionsSortedByAmount() throws Exception {
-        List<Transaction> l = readAllTransactions();
-        Collections.sort(l);
-        return l;
+
+        return readAllTransactions().stream()
+                .sorted(Comparator.comparing(Transaction::getAmount))
+                .collect(Collectors.toList());
     }
 
     // task 7
     public double getFraudPercentageForMen() throws Exception {
 
-        System.out.println("IS F: " + readAllTransactions().stream().filter(Transaction::isFraud).count() );
-        return (double) readAllTransactions().stream()
+        return (double) (readAllTransactions().stream()
                 .filter(transaction -> transaction.getGender().toLowerCase()
-                        .equals("m") && transaction.isFraud()).count() /
+                        .equals("m") && transaction.isFraud()).count()) /
                 (readAllTransactions().stream().filter(Transaction::isFraud).count());
     }
 
     // task 8
-    public Set<Transaction> getCustomerIdsWithNumberOfFraudulentTransactions(int numberOfFraudulentTransactions) throws Exception {
-        return Set.of();
+    // changed the return type to Set<String>
+    // having return type of Set<Transaction> was not correct for this task - so changed to return type of Set<String>
+    // because all that is asked for is the set of customer IDs, so don't need all the other fields
+    public Set<String> getCustomerIdsWithNumberOfFraudulentTransactions(int numberOfFraudulentTransactions) throws Exception {
+        return readAllTransactions().stream().filter(Transaction::isFraud).collect(
+                Collectors.groupingBy(
+                        Transaction::getCustomerId, Collectors.counting()
+                )).entrySet().stream().filter(fraud -> fraud.getValue() >= numberOfFraudulentTransactions).
+                map(Map.Entry::getKey).
+                collect(Collectors.toSet());
     }
 
     // task 9
     public Map<String, Integer> getCustomerIdToNumberOfTransactions() throws Exception {
-        return Map.of();
+
+        return readAllTransactions().stream().filter((Transaction::isFraud)).collect(
+                Collectors.groupingBy(
+                        Transaction::getCustomerId, Collectors.counting()
+                )
+        ).entrySet().stream()
+                .collect(Collectors
+                        .toMap(Map.Entry::getKey, stringLongEntry -> stringLongEntry.getValue().intValue()));
     }
 
     // task 10
     public Map<String, Double> getMerchantIdToTotalAmountOfFraudulentTransactions() throws Exception {
-        return Map.of();
+        return readAllTransactions().stream().filter((Transaction::isFraud)).collect(
+                Collectors.groupingBy(
+                        Transaction::getMerchantId, Collectors.counting()
+                )
+        ).entrySet().stream()
+                .collect(Collectors
+                        .toMap(Map.Entry::getKey, stringLongEntry -> stringLongEntry.getValue().doubleValue()));
+
     }
 
     // bonus

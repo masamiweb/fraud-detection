@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
@@ -67,7 +68,7 @@ public class DataCruncherTest {
         List<Transaction> allTransactionsSortedByAmount = dataCruncher.getAllTransactionsSortedByAmount();
 
         // check the list is sorted in ascending order of Amount
-        assertEquals(true,isSorted(allTransactionsSortedByAmount, Transaction::getAmount));
+        assertTrue(isSorted(allTransactionsSortedByAmount, Transaction::getAmount));
 
     }
 
@@ -81,8 +82,9 @@ public class DataCruncherTest {
     // task8
     @Test
     public void getCustomerIdsWithNumberOfFraudulentTransactions() throws Exception {
-        Set<Transaction> customerIdsWithNumberOfFraudulentTransactions = dataCruncher.getCustomerIdsWithNumberOfFraudulentTransactions(3);
-        fail();
+        Set<String> customerIdsWithNumberOfFraudulentTransactions = dataCruncher.getCustomerIdsWithNumberOfFraudulentTransactions(3);
+        assertTrue(checkTwoSetsAreIdentical(customerIdsWithNumberOfFraudulentTransactions, 3));
+
     }
 
     // task9
@@ -99,17 +101,44 @@ public class DataCruncherTest {
         fail();
     }
 
-    private static <T, R extends Comparable<? super R>> boolean isSorted(List<T> list, Function<T, R> f) {
+
+    // check both Sets are equal or not
+    private boolean checkTwoSetsAreIdentical(Set<String> returnedSet, int numberOfFraudulentTransactions) throws Exception {
+
+        Set<String> toCheck = new HashSet<>();
+
+        Map<String, Integer> allCustomersAndFraudTransactionTotals = dataCruncher.readAllTransactions().stream().filter((Transaction::isFraud)).collect(
+                Collectors.groupingBy(
+                        Transaction::getCustomerId, Collectors.counting()
+                )
+        ).entrySet().stream()
+                .collect(Collectors
+                        .toMap(Map.Entry::getKey, stringLongEntry -> stringLongEntry.getValue().intValue()));
+
+
+//        if (numberOfFraudulentTransactions == 0)
+//            return returnedSet.equals(toCheck);
+
+            allCustomersAndFraudTransactionTotals.forEach((k, v) -> {
+                if (v >= numberOfFraudulentTransactions)
+                    toCheck.add(k);
+            });
+
+            // returns true if both sets are same size and contain the same values exactly
+            return returnedSet.equals(toCheck);
+
+
+    }
+
+    private  <T, R extends Comparable<? super R>> boolean isSorted(List<T> list, Function<T, R> f) {
         Comparator<T> comp = Comparator.comparing(f);
         for (int i = 0; i < list.size() - 1; ++i) {
             T left = list.get(i);
             T right = list.get(i + 1);
-            if (comp.compare(left, right) > 0) {
-                System.out.println("INDEX: " + i);
+            if (comp.compare(left, right) > 0) { // check if left greater than right
                 return false;
             }
         }
-
         return true;
     }
 
