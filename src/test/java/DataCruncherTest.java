@@ -66,7 +66,6 @@ public class DataCruncherTest {
     @Test
     public void getAllTransactionSortedByAmount() throws Exception {
         List<Transaction> allTransactionsSortedByAmount = dataCruncher.getAllTransactionsSortedByAmount();
-
         // check the list is sorted in ascending order of Amount
         assertTrue(isSorted(allTransactionsSortedByAmount, Transaction::getAmount));
 
@@ -85,51 +84,93 @@ public class DataCruncherTest {
         Set<String> customerIdsWithNumberOfFraudulentTransactions = dataCruncher.getCustomerIdsWithNumberOfFraudulentTransactions(3);
         assertTrue(checkTwoSetsAreIdentical(customerIdsWithNumberOfFraudulentTransactions, 3));
 
+        customerIdsWithNumberOfFraudulentTransactions = dataCruncher.getCustomerIdsWithNumberOfFraudulentTransactions(0);
+        assertTrue(checkTwoSetsAreIdentical(customerIdsWithNumberOfFraudulentTransactions, 0));
+
     }
 
     // task9
     @Test
     public void getCustomerIdToNumberOfTransactions() throws Exception {
         Map<String, Integer> customerIdToNumberOfTransactions = dataCruncher.getCustomerIdToNumberOfTransactions();
-        fail();
+        assertTrue(checkTwoSetsAreIdenticalMerchantIDInteger(customerIdToNumberOfTransactions));
     }
 
     // task10
     @Test
     public void getMerchantIdToTotalAmountOfFraudulentTransactions() throws Exception {
         Map<String, Double> merchantIdToTotalAmountOfFraudulentTransactions = dataCruncher.getMerchantIdToTotalAmountOfFraudulentTransactions();
-        fail();
+        assertTrue(checkTwoSetsAreIdenticalMerchantIDDouble(merchantIdToTotalAmountOfFraudulentTransactions));
     }
 
 
+    // test 8 helper method
     // check both Sets are equal or not
     private boolean checkTwoSetsAreIdentical(Set<String> returnedSet, int numberOfFraudulentTransactions) throws Exception {
 
         Set<String> toCheck = new HashSet<>();
 
-        Map<String, Integer> allCustomersAndFraudTransactionTotals = dataCruncher.readAllTransactions().stream().filter((Transaction::isFraud)).collect(
-                Collectors.groupingBy(
-                        Transaction::getCustomerId, Collectors.counting()
-                )
-        ).entrySet().stream()
+        Map<String, Integer> allCustomersAndFraudTransactionTotals = dataCruncher.readAllTransactions()
+                .stream().filter((Transaction::isFraud)).collect(
+                        Collectors.groupingBy(
+                                Transaction::getCustomerId, Collectors.counting()
+                        )
+                ).entrySet().stream()
                 .collect(Collectors
-                        .toMap(Map.Entry::getKey, stringLongEntry -> stringLongEntry.getValue().intValue()));
+                        .toMap(Map.Entry::getKey, stringLongEntry -> stringLongEntry
+                                .getValue().intValue()));
 
 
-//        if (numberOfFraudulentTransactions == 0)
-//            return returnedSet.equals(toCheck);
+        allCustomersAndFraudTransactionTotals.forEach((k, v) -> {
+            if (v >= numberOfFraudulentTransactions)
+                toCheck.add(k);
+        });
 
-            allCustomersAndFraudTransactionTotals.forEach((k, v) -> {
-                if (v >= numberOfFraudulentTransactions)
-                    toCheck.add(k);
-            });
-
-            // returns true if both sets are same size and contain the same values exactly
-            return returnedSet.equals(toCheck);
-
+        // returns true if both sets are same size AND contain the same values exactly
+        return returnedSet.equals(toCheck);
 
     }
 
+    // test 9 helper method
+    // check both Maps are equal or not - make it generic to handle any type of key and value
+    private boolean checkTwoSetsAreIdenticalMerchantIDInteger(Map<String, Integer> toCheck) throws Exception {
+
+        Map<String, Integer> allCustomersAndFraudTransactionTotals = dataCruncher.readAllTransactions()
+                .stream().filter((Transaction::isFraud)).collect(
+                        Collectors.groupingBy(
+                                Transaction::getCustomerId, Collectors.counting()
+                        )
+                ).entrySet().stream()
+                .collect(Collectors
+                        .toMap(Map.Entry::getKey, stringLongEntry -> stringLongEntry
+                                .getValue().intValue()));
+
+
+        // returns true if both Maps are same size AND contain the same values exactly
+        return toCheck.equals(allCustomersAndFraudTransactionTotals);
+
+    }
+
+    // test 10 helper method
+    // check both Maps are equal or not - make it generic to handle any type of key and value
+    private boolean checkTwoSetsAreIdenticalMerchantIDDouble(Map<String, Double> toCheck) throws Exception {
+
+        Map<String, Double> allMerchantAndFraudTransactionTotals = dataCruncher.readAllTransactions()
+                .stream().filter((Transaction::isFraud)).collect(
+                        Collectors.groupingBy(
+                                Transaction::getMerchantId, Collectors.counting()
+                        )
+                ).entrySet().stream()
+                .collect(Collectors
+                        .toMap(Map.Entry::getKey, stringLongEntry -> stringLongEntry
+                                .getValue().doubleValue()));
+
+        // returns true if both Maps are same size AND contain the same values exactly
+        return toCheck.equals(allMerchantAndFraudTransactionTotals);
+    }
+
+
+    // test 8 helper method
     private  <T, R extends Comparable<? super R>> boolean isSorted(List<T> list, Function<T, R> f) {
         Comparator<T> comp = Comparator.comparing(f);
         for (int i = 0; i < list.size() - 1; ++i) {
