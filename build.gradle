@@ -17,5 +17,6 @@ dependencies {
 
 dependencies {
     compile group: 'com.google.guava', name: 'guava', version: '14.0'
-    compile group: 'nz.ac.waikato.cms.weka', name: 'weka-stable', version: '3.6.6'
+    compile group: 'nz.ac.waikato.cms.weka', name: 'weka-stable', version: '3.8.0'
+
 }
