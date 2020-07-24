@@ -1,50 +1,62 @@
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-
-import java.util.ArrayList;
+import java.io.*;
 
 public class CreateSingleInstance {
 
-    private Attribute customer;
-    private Attribute age;
-    private Attribute gender;
-    private Attribute merchant;
-    private Attribute category;
-    private Attribute amount;
-
-    private ArrayList<Attribute> attributes;
-    private ArrayList<String> classVal;
-    private Instances dataRaw;
 
     public CreateSingleInstance(){
 
+//        @relation test
+//        @attribute customer {C1128349548}
+//        @attribute age numeric
+//        @attribute gender {F,M,U}
+//        @attribute merchant {M1823072687}
+//        @attribute category {es_transportation,es_wellnessandbeauty,es_food,es_fashion,es_otherservices,es_hyper,es_health,es_sportsandtoys,es_home,es_barsandrestaurants,es_contents,es_tech,es_hotelservices,es_leisure,es_travel}
+//        @attribute amount numeric
+//        @attribute fraud {0,1}
+//        @data C1128349548,2,F,M1823072687,es_transportation,67.58,?
+
+
     }
 
-    public Instance formatInstance(String c, int a, String g, String m, String cat, double amt){
-
-        ArrayList<String> attributes = null;
-        customer = new Attribute("customer",0);
-        age = new Attribute("age" ,1);
-        gender = new Attribute("gender", 2);
-        merchant = new Attribute("merchant", 3);
-        category = new Attribute("category", 4);
-        amount = new Attribute("amount", 5);
+    // this is not great coding - but until I figure out the weka API for creating a single instance
+    // for use with the decision tree - will creat one by hand and save to file for testing purposes
+    public void formatInstance(String customer, int age, String gender, String merchant, String category, double amount, String filePath) throws IOException {
 
 
-        Instance inst = new DenseInstance(7);
+        File fout = new File(filePath);
+        FileOutputStream fos = new FileOutputStream(fout);
 
-        inst.setValue(customer,"C251602943" );
-        inst.setValue(age, a);
-        inst.setValue(gender, g);
-        inst.setValue(merchant, m);
-        inst.setValue(category, cat);
-        inst.setValue(amount, amt);
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
 
-        inst.setClassMissing();
-        return inst;
 
-        // C251602943,2,F,M348934600,es_transportation,13.08,1
+        bw.write("@relation test");
+        bw.newLine();
+
+        bw.write("@attribute customer {"+customer+"}");
+        bw.newLine();
+
+        bw.write("@attribute age {"+age+"}");
+        bw.newLine();
+
+        bw.write("@attribute gender {F,M,U}");
+        bw.newLine();
+
+        bw.write("@attribute merchant {"+merchant+"}");
+        bw.newLine();
+
+        bw.write("@attribute category {es_transportation,es_wellnessandbeauty,es_food,es_fashion,es_otherservices,es_hyper,es_health,es_sportsandtoys,es_home,es_barsandrestaurants,es_contents,es_tech,es_hotelservices,es_leisure,es_travel}");
+        bw.newLine();
+
+        bw.write("@attribute amount {"+amount+"}");
+        bw.newLine();
+
+        bw.write("@attribute fraud {0,1}");
+        bw.newLine();
+
+        bw.write("@data "+customer+","+age+","+gender+","+merchant+","+category+","+amount+","+"?");
+
+       // @data C1128349548,2,F,M1823072687,es_transportation,67.58,?
+
+        bw.close();
     }
 }

@@ -1,7 +1,3 @@
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
-
 import org.junit.Test;
 
 import java.util.*;
@@ -104,6 +100,29 @@ public class DataCruncherTest {
     }
 
 
+    // bonus task
+    // This test will check it is a valid probability i.e is within range of 0 to 1
+    @Test
+    public void getRiskOfFraudFigure() throws Exception {
+        String customerId = "C2054744914";
+        int age = 2;
+        String gender = "M";
+        String customerZipCode = "28007";
+        String merchantId = "M348934600";
+        String merchantZipCode = "28007";
+        String category = "es_health";
+        double amount = 3.72;
+        boolean isFraud = true;
+
+
+        assertEquals(0.50, dataCruncher
+                .getRiskOfFraudFigure(new Transaction(customerId, age, gender, customerZipCode, merchantId, merchantZipCode, category, amount, isFraud)), 0.50);
+
+    }
+
+    // ########################################################################################################## //
+    /** HELPER METHODS USED BY THE TESTS ABOVE **/
+
     // test 8 helper method
     // check both Sets are equal or not
     private boolean checkTwoSetsAreIdentical(Set<String> returnedSet, int numberOfFraudulentTransactions) throws Exception {
@@ -170,7 +189,7 @@ public class DataCruncherTest {
     }
 
 
-    // test 8 helper method
+    // test 6 helper method
     private  <T, R extends Comparable<? super R>> boolean isSorted(List<T> list, Function<T, R> f) {
         Comparator<T> comp = Comparator.comparing(f);
         for (int i = 0; i < list.size() - 1; ++i) {
