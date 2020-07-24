@@ -1,13 +1,20 @@
-import weka.classifiers.bayes.NaiveBayes;
+import weka.classifiers.trees.J48;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.SerializationHelper;
 import weka.core.converters.ConverterUtils.DataSource;
+
+import java.text.DecimalFormat;
 
 
 public class Test {
 
+
+
+
+    private static DecimalFormat df2 = new DecimalFormat("#.##");
     public static final String TRAINING_DATA = "src/main/resources/train.arff";
-    public static final String TESTING_DATA = "src/main/resources/test.arff";
+    public static final String TESTING_DATA = "src/main/resources/checkOneInstance.arff";
 
     public static final String MODElPATH = "src/main/resources/pay.bin";
 
@@ -31,8 +38,13 @@ public class Test {
         }
 
         // creat and build the classifier
-        NaiveBayes nb = new NaiveBayes();
+        J48 nb = new J48();
+        nb.setOptions(new String[] { "-C", "0.5", "-M", "2", "-A", "-Q", "2"});
+
         nb.buildClassifier(trainData);
+
+        // save the model - so we can then use it to test single instances
+        SerializationHelper.write(MODElPATH,nb);
 
         // now load the test data to check the classifier
         DataSource test = new DataSource(TESTING_DATA);
@@ -40,32 +52,27 @@ public class Test {
         // set index to last value - for the column of class attribute
         testData.setClassIndex(testData.numAttributes() - 1);
 
-        // loop through the test data to make predictions
-        int numOfTestDataLines = testData.numInstances();
-        double actualClass;
-        String actual;
         Instance newInst;
+
         System.out.println("====================================");
-        System.out.println("Actual Class,  NB Predicted,         Probability");
-        for (int i =0; i < 10; i++ ){
-            // get class double value for current instance
-            actualClass = testData.instance(i).classValue();
-            actual = testData.classAttribute().value((int)actualClass);
+        System.out.println("Predicted         Probability");
 
-            // get instance object of current  instance
-            newInst = testData.instance(i);
+            newInst = testData.instance(0);
 
+            double [] distances = nb.distributionForInstance(newInst);
             // call classifyInstance method - this returns a double value for the class
             double predictedNB = nb.classifyInstance(newInst);
 
 
-            // use this retuned value to get the string value of the predicted class - i.e. 0 for n fraud
+            // use this returned value to get the string value of the predicted class - i.e. 0 for n fraud
             // and 1 for fraud
             String predString = testData.classAttribute().value((int) predictedNB);
-            System.out.println(actual + "                  " + predString + "               " + nb.getClassEstimator().getProbability(predictedNB));
+            if (predString.equals("0"))
+                predString = "(0) No Fraud";
+            else
+                predString = "(1) Fraud";
+            System.out.println(predString + "               " + df2.format(distances[1]));
 
-
-        }
 
     }
 

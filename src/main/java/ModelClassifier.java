@@ -1,9 +1,6 @@
 import weka.classifiers.Classifier;
-import weka.classifiers.bayes.NaiveBayes;
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.SerializationHelper;
+import weka.classifiers.trees.J48;
+import weka.core.*;
 
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -12,7 +9,7 @@ import java.util.logging.Logger;
 
 public class ModelClassifier {
 
-    private Attribute customer;
+   // private Attribute customer;
     private Attribute age;
     private Attribute gender;
     private Attribute merchant;
@@ -25,7 +22,7 @@ public class ModelClassifier {
 
 
     public ModelClassifier() {
-        customer = new Attribute  ("customer"); //
+        //customer = new Attribute  ("customer"); //
         age = new Attribute("age");
         gender = new Attribute("gender");
         merchant = new Attribute("merchant");
@@ -38,32 +35,50 @@ public class ModelClassifier {
         classVal.add("0");
         classVal.add("1");
 
-        attributes.add(customer);
+        //attributes.add(customer);
         attributes.add(age);
         attributes.add(gender);
         attributes.add(merchant);
         attributes.add(category);
         attributes.add(amount);
 
+
+
         attributes.add(new Attribute("fraud", classVal));
         dataRaw = new Instances("TestInstances", attributes, 0);
         dataRaw.setClassIndex(dataRaw.numAttributes() - 1);
     }
 
-
-    public Instances createInstance(double age, double gender, double category, double amount, double result) {
+//4,M,M348934600,es_transportation,4.55,0
+    public Instances createInstance(double age, String gender, String merchant, String category, double amount) {
         dataRaw.clear();
-        double[] instanceValue1 = new double[]{age, gender, category, amount, 9};
-        dataRaw.add(new DenseInstance(1.0, instanceValue1));
+        Instance inst = new DenseInstance(6);
+
+
+
+        inst.setValue(this.age, age);
+        inst.setValue(this.gender, gender);
+        inst.setValue(this.merchant, merchant);
+        inst.setValue(this.category, category);
+        inst.setValue(this.amount, amount);
+        inst.setClassMissing();
+
+        inst.setDataset(dataRaw);
+
+        dataRaw.add(inst);
+
+
+
+
         return dataRaw;
     }
 
 
-    public String classifiy(Instances insts, String path) {
+    public String classifyOneInstance(Instances insts, String path) {
         String result = "Not classified!!";
         Classifier cls = null;
         try {
-            cls = (NaiveBayes) SerializationHelper.read(path);
+            cls = (J48) SerializationHelper.read(path);
             result = (String) classVal.get((int) cls.classifyInstance(insts.firstInstance()));
         } catch (Exception ex) {
             Logger.getLogger(ModelClassifier.class.getName()).log(Level.SEVERE, null, ex);
