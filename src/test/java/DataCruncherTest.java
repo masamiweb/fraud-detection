@@ -101,7 +101,7 @@ public class DataCruncherTest {
 
 
     // bonus task
-    // This test will check it is a valid probability i.e is within range of 0 to 1
+    // This test will check a valid probability is returned i.e is within range of 0 to 1
     @Test
     public void getRiskOfFraudFigure() throws Exception {
         String customerId = "C2054744914";
@@ -114,14 +114,13 @@ public class DataCruncherTest {
         double amount = 3.72;
         boolean isFraud = true;
 
-
         assertEquals(0.50, dataCruncher
                 .getRiskOfFraudFigure(new Transaction(customerId, age, gender, customerZipCode, merchantId, merchantZipCode, category, amount, isFraud)), 0.50);
 
     }
 
     // ########################################################################################################## //
-    /** HELPER METHODS USED BY THE TESTS ABOVE **/
+    /** HELPER METHODS USED BY THE TESTS **/
 
     // test 8 helper method
     // check both Sets are equal or not
