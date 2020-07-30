@@ -137,36 +137,31 @@ public class DataCruncher {
     // bonus
     public double getRiskOfFraudFigure(Transaction transaction) throws Exception {
 
-        CreateSingleInstance inst = new CreateSingleInstance();
-
         final String TRAINING_DATA = "src/main/resources/train.arff";
         final String TESTING_DATA = "src/main/resources/checkOneInstance.arff";
-        final String MODElPATH = "src/main/resources/pay-weka-model.bin"; // save the model for later use in weka
+        final String MODElPATH = "src/main/resources/risk OfFraud-model.bin"; // save the model for later use in weka
 
-        // create the test data file in the correct format
-        // and save for later use
+        // create the test data file in the correct format and save to file
+        CreateSingleInstance inst = new CreateSingleInstance();
         inst.formatInstance(transaction.getCustomerId(),
                 transaction.getAge(), transaction.getGender().toUpperCase(), transaction.getMerchantId(),
                 transaction.getCategory().toLowerCase(), transaction.getAmount(),TESTING_DATA );
 
-        // load training data
+        // load the training data
         ConverterUtils.DataSource train = new ConverterUtils.DataSource(TRAINING_DATA);
         Instances trainData = train.getDataSet();
 
-        // set the index for the class column i.e. fraud column
-        // this should always be the last column in the data file
+        // set the index for the class column i.e. "fraud" column is last column in the file in this case
         trainData.setClassIndex(trainData.numAttributes() - 1);
 
-        // get the number of classes
-        int numClasses = trainData.numClasses();
-
-        // create and build the classifier - using decision tree for this - J48 in weka API
+        // create and build the classifier - using decision tree for this - see J48 in weka API
         J48 nb = new J48();
-        nb.setOptions(new String[] { "-C", "0.5", "-M", "2", "-A", "-Q", "2"});
+        nb.setOptions(new String[] { "-C", "0.5", "-M", "2", "-A", "-Q", "2"}); // J48 custome parameters
 
+        // build the model
         nb.buildClassifier(trainData);
 
-        // save the model - so we can then use it to test single instances
+        // save the model - this can be used later - without having to run the classifier every time
         SerializationHelper.write(MODElPATH,nb);
 
         // now load the test data to check the classifier
@@ -179,15 +174,17 @@ public class DataCruncher {
 
         newInst = testData.instance(0);
 
+        // returns probabilities array - for actual and predicted
+        // predicted probability will be at array index 1
         double [] distances = nb.distributionForInstance(newInst);
-        // call classifyInstance method - this returns a double value for the class
+
+        // call classifyInstance method - this returns a double value for the class (i.e. 0 or 1)
         double predictedNB = nb.classifyInstance(newInst);
 
-        // use this returned value to get the string value of the predicted class - i.e. 0 for n fraud
-        // and 1 for fraud
+        // use this returned value to get the string value of the predicted class (0 = noFraud : 1 = Fraud)
         String predString = testData.classAttribute().value((int) predictedNB);
-        if (predString.equals("0")) // i.e not a fraudulent transaction
-            return 1 - distances[1];
+        if (predString.equals("0"))
+            return 1 - distances[1]; // i.e not a fraudulent transaction (1 - probability it IS a fraud)
         else // a fraudulent transaction
             return distances[1];
 

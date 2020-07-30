@@ -1,9 +1,9 @@
 @relation test
-@attribute customer {C564451627}
-@attribute age {4}
+@attribute customer {C2054744914}
+@attribute age {2}
 @attribute gender {F,M,U}
-@attribute merchant {M1823072687}
+@attribute merchant {M348934600}
 @attribute category {es_transportation,es_wellnessandbeauty,es_food,es_fashion,es_otherservices,es_hyper,es_health,es_sportsandtoys,es_home,es_barsandrestaurants,es_contents,es_tech,es_hotelservices,es_leisure,es_travel}
-@attribute amount {24.23}
+@attribute amount {3.72}
 @attribute fraud {0,1}
-@data C564451627,4,F,M1823072687,es_transportation,24.23,?
+@data C2054744914,2,M,M348934600,es_health,3.72,?

@@ -100,7 +100,7 @@ public class DataCruncherTest {
     }
 
 
-    // bonus task
+    // task11 bonus task
     // This test will check a valid probability is returned i.e is within range of 0 to 1
     @Test
     public void getRiskOfFraudFigure() throws Exception {
